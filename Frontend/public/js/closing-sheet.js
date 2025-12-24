@@ -255,7 +255,7 @@ async function loadSheet() {
                 const relevantRecords = dailyCashData.filter(r =>
                     r.department && bigCashDeptIds.includes(r.department._id || r.department)
                 );
-                receivedCashSum = relevantRecords.reduce((sum, r) => sum + (r.bigCash || 0), 0);
+                receivedCashSum = relevantRecords.reduce((sum, r) => sum + Math.abs(r.bigCash || 0), 0);
             }
         } catch (e) { console.error('Error fetching data:', e); }
 
