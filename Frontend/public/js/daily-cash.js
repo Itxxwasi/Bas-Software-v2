@@ -104,15 +104,29 @@ async function loadBranches() {
         if (data.success) {
             const select = document.getElementById('branch');
             select.innerHTML = '<option value="">Select Branch</option>'; // Clear default options
-            data.data.forEach(store => {
+
+            // Get Logged In User
+            const user = JSON.parse(localStorage.getItem('user')) || {};
+            const userBranch = user.branch;
+
+            // Filter stores if user has a specific branch assigned
+            const validStores = data.data.filter(store => {
+                if (!userBranch || userBranch === 'All Branches') return true;
+                return store.name === userBranch;
+            });
+
+            validStores.forEach(store => {
                 const option = document.createElement('option');
                 option.value = store.name;
                 option.textContent = store.name;
                 select.appendChild(option);
             });
-            // Trigger change to load departments for first branch only if single branch
-            if (data.data.length === 1) {
-                select.value = data.data[0].name;
+
+            // Auto-select if only one option (either by filter or actual single store)
+            if (validStores.length === 1) {
+                select.value = validStores[0].name;
+            } else if (userBranch && validStores.find(s => s.name === userBranch)) {
+                select.value = userBranch;
             }
         }
     } catch (e) {
@@ -321,7 +335,36 @@ function showList() {
     // Populate Branch
     const mainBranch = document.getElementById('branch').innerHTML;
     const listBranch = document.getElementById('listBranch');
-    if (listBranch) listBranch.innerHTML = '<option value="">All Branches</option>' + mainBranch;
+
+    if (listBranch) {
+        // Check User Logic
+        const user = JSON.parse(localStorage.getItem('user')) || {};
+        const userBranch = user.branch;
+
+        if (!userBranch || userBranch === 'All Branches') {
+            listBranch.innerHTML = '<option value="">All Branches</option>' + mainBranch;
+        } else {
+            // User is restricted, so 'All Branches' is not allowed. Just show their allowed branches.
+            // Since 'mainBranch' options are already filtered by loadBranches(), we can just use that.
+            // But we might need to remove "Select Branch" if it's there? No, usually fine.
+            // Usually mainBranch has "Select Branch" as first option. 
+            // If we just dump it, the list filter will have "Select Branch" which maps to value="" -> All Branches in backend?
+            // Wait, empty value usually means "All" in filters.
+
+            // If user is restricted to "F-6", we want the list to ONLY show "F-6".
+            // The backend query `daily-cash?branch=F-6`.
+            // If the select value is "F-6", it works.
+            // If the select value is "" (Select Branch), the backend might return ALL.
+
+            // We need to ensure the default selection is their branch.
+
+            listBranch.innerHTML = mainBranch;
+            // Remove "Select Branch" dummy option if present so they can't select "nothing" (which implies All)
+            if (listBranch.options.length > 0 && listBranch.options[0].value === "") {
+                listBranch.remove(0);
+            }
+        }
+    }
 
     const modalEl = document.getElementById('listModal');
     // Use getOrCreateInstance to prevent duplicates

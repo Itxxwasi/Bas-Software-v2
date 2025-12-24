@@ -112,14 +112,29 @@ async function loadBranches() {
         if (data.success) {
             const select = document.getElementById('branch');
             select.innerHTML = '<option value="">Select Branch</option>'; // Clear default options
-            data.data.forEach(store => {
+
+            // Get Logged In User
+            const user = JSON.parse(localStorage.getItem('user')) || {};
+            const userBranch = user.branch;
+
+            // Filter stores
+            const validStores = data.data.filter(store => {
+                if (!userBranch || userBranch === 'All Branches') return true;
+                return store.name === userBranch;
+            });
+
+            validStores.forEach(store => {
                 const option = document.createElement('option');
                 option.value = store.name;
                 option.textContent = store.name;
                 select.appendChild(option);
             });
-            if (data.data.length === 1) {
-                select.value = data.data[0].name;
+
+            // Auto-select
+            if (validStores.length === 1) {
+                select.value = validStores[0].name;
+            } else if (userBranch && validStores.find(s => s.name === userBranch)) {
+                select.value = userBranch;
             }
         }
     } catch (e) {
