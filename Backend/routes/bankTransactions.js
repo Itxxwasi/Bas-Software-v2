@@ -19,11 +19,11 @@ router.get('/summary', protect, accountsAccess, getBankBookSummary);
 router.get('/banks', protect, accountsAccess, getBankList);
 
 // Bulk Update - Changed name to avoid conflict with /:id
-router.put('/bulk-verify-status', protect, managerAccess, verifyBankTransactions);
+router.put('/bulk-verify-status', protect, accountsAccess, verifyBankTransactions);
 
 // ID routes
 router.get('/:id', protect, accountsAccess, getBankTransaction);
-router.put('/:id', protect, managerAccess, updateBankTransaction);
+router.put('/:id', protect, accountsAccess, updateBankTransaction);
 router.delete('/:id', protect, adminAccess, deleteBankTransaction);
 
 module.exports = router;
