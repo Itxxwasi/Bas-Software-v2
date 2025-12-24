@@ -15,7 +15,7 @@ exports.protect = async (req, res, next) => {
 
   // Make sure token exists
   if (!token) {
-    return res.status(401).json({ msg: 'Not authorized to access this route' });
+    return res.status(401).json({ success: false, message: 'Not authorized to access this route' });
   }
 
   try {
@@ -29,18 +29,18 @@ exports.protect = async (req, res, next) => {
 
     // Check if user exists
     if (!req.user) {
-      return res.status(401).json({ msg: 'User not found' });
+      return res.status(401).json({ success: false, message: 'User not found' });
     }
 
     // Check if user is active
     if (!req.user.isActive) {
-      return res.status(401).json({ msg: 'User account is deactivated' });
+      return res.status(401).json({ success: false, message: 'User account is deactivated' });
     }
 
     next();
   } catch (err) {
     console.error(err);
-    return res.status(401).json({ msg: 'Not authorized to access this route' });
+    return res.status(401).json({ success: false, message: 'Not authorized to access this route' });
   }
 };
 
@@ -49,7 +49,8 @@ exports.authorize = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
       return res.status(403).json({
-        msg: `User role ${req.user.role} is not authorized to access this route`
+        success: false,
+        message: `User role ${req.user.role} is not authorized to access this route`
       });
     }
     next();
@@ -60,7 +61,8 @@ exports.authorize = (...roles) => {
 exports.adminAccess = (req, res, next) => {
   if (req.user.role !== 'admin') {
     return res.status(403).json({
-      msg: 'Admin access required'
+      success: false,
+      message: 'Admin access required'
     });
   }
   next();
@@ -70,7 +72,8 @@ exports.adminAccess = (req, res, next) => {
 exports.salesAccess = (req, res, next) => {
   if (!['admin', 'manager', 'sales'].includes(req.user.role)) {
     return res.status(403).json({
-      msg: 'Sales access required'
+      success: false,
+      message: 'Sales access required'
     });
   }
   next();
@@ -80,7 +83,8 @@ exports.salesAccess = (req, res, next) => {
 exports.accountsAccess = (req, res, next) => {
   if (!['admin', 'manager', 'accounts'].includes(req.user.role)) {
     return res.status(403).json({
-      msg: 'Accounts access required'
+      success: false,
+      message: 'Accounts access required'
     });
   }
   next();
@@ -90,7 +94,8 @@ exports.accountsAccess = (req, res, next) => {
 exports.managerAccess = (req, res, next) => {
   if (!['admin', 'manager'].includes(req.user.role)) {
     return res.status(403).json({
-      msg: 'Manager access required'
+      success: false,
+      message: 'Manager access required'
     });
   }
   next();

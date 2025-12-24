@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const dateFields = document.querySelectorAll('input[type="date"]');
     dateFields.forEach(field => {
         const id = field.id;
-        if (id === 'bp-chq-from' || id === 'bp-chq-to' || id === 'bs-from-date' || id === 'bs-to-date' || id === 'btb-date' || id === 'btb-filter-from' || id === 'btb-filter-to') {
+        if (id === 'bp-chq-from' || id === 'bp-chq-to' || id === 'bd-from-date' || id === 'bd-to-date' || id === 'bs-from-date' || id === 'bs-to-date' || id === 'btb-date' || id === 'btb-filter-from' || id === 'btb-filter-to') {
             field.value = today;
         } else if (id.includes('from') || id.includes('to') || id.includes('search')) {
             field.value = '';
@@ -128,6 +128,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Totals should only update AFTER "Update" is clicked and saved.
         });
     }
+
+    // Auto-search on Bank Mode Switch
+    const modeRadios = document.getElementsByName('bankActionType');
+    modeRadios.forEach(radio => {
+        radio.addEventListener('change', () => {
+            searchBankDetails();
+        });
+    });
 });
 
 let allBranches = [];
