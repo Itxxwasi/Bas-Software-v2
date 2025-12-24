@@ -119,8 +119,11 @@ async function loadBranches() {
 
             // Filter stores
             const validStores = data.data.filter(store => {
-                if (!userBranch || userBranch === 'All Branches') return true;
-                return store.name === userBranch;
+                const uBranch = String(userBranch || '').trim().toLowerCase();
+                if (!uBranch || uBranch.includes('all branches')) return true;
+
+                const sName = (store.name || '').trim().toLowerCase();
+                return uBranch.includes(sName);
             });
 
             validStores.forEach(store => {
@@ -133,8 +136,10 @@ async function loadBranches() {
             // Auto-select
             if (validStores.length === 1) {
                 select.value = validStores[0].name;
-            } else if (userBranch && validStores.find(s => s.name === userBranch)) {
-                select.value = userBranch;
+            } else if (userBranch) {
+                const uBranch = String(userBranch).trim().toLowerCase();
+                const match = validStores.find(s => (s.name || '').trim().toLowerCase() === uBranch);
+                if (match) select.value = match.name;
             }
         }
     } catch (e) {

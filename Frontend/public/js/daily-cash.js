@@ -111,8 +111,15 @@ async function loadBranches() {
 
             // Filter stores if user has a specific branch assigned
             const validStores = data.data.filter(store => {
-                if (!userBranch || userBranch === 'All Branches') return true;
-                return store.name === userBranch;
+                const uBranch = String(userBranch || '').trim().toLowerCase();
+
+                // If user has "All Branches" access or no restriction
+                if (!uBranch || uBranch.includes('all branches')) return true;
+
+                const sName = (store.name || '').trim().toLowerCase();
+                // Check if the store name is contained within the user's branch string
+                // The user's branch string appears to be formatted like "(Branch A), (Branch B)"
+                return uBranch.includes(sName);
             });
 
             validStores.forEach(store => {
@@ -125,8 +132,16 @@ async function loadBranches() {
             // Auto-select if only one option (either by filter or actual single store)
             if (validStores.length === 1) {
                 select.value = validStores[0].name;
-            } else if (userBranch && validStores.find(s => s.name === userBranch)) {
-                select.value = userBranch;
+                // Force trigger change to load departments
+                select.dispatchEvent(new Event('change'));
+            } else if (userBranch) {
+                // Find matching option (case insensitive)
+                const uBranch = String(userBranch).trim().toLowerCase();
+                const match = validStores.find(s => (s.name || '').trim().toLowerCase() === uBranch);
+                if (match) {
+                    select.value = match.name;
+                    select.dispatchEvent(new Event('change'));
+                }
             }
         }
     } catch (e) {
