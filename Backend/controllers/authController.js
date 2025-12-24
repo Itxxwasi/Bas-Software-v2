@@ -127,14 +127,20 @@ exports.login = async (req, res) => {
 
     console.log('Finalized Rights Payload:', JSON.stringify(finalizedRights, null, 2));
 
+    if (!process.env.JWT_SECRET) {
+      console.error('FATAL ERROR: JWT_SECRET is not defined in environment variables');
+      return res.status(500).json({ success: false, message: 'Server misconfiguration: Missing JWT_SECRET' });
+    }
+
     jwt.sign(
       payload,
       process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRE },
+      { expiresIn: process.env.JWT_EXPIRE || '1d' }, // Default to 1d if missing
       (err, token) => {
         if (err) {
-          console.error('JWT Signing Error:', err);
-          return res.status(500).json({ success: false, message: 'Token generation failed' });
+          console.error('JWT Signing Error Stack:', err.stack);
+          console.error('JWT Signing Error details:', err);
+          return res.status(500).json({ success: false, message: 'Token generation failed: ' + err.message });
         }
         console.log('Login successful, sending token');
         res.json({
